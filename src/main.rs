@@ -10,6 +10,7 @@
 
 // start fresh counter: 3
 
+use std::env;
 use std::fs;
 use std::io;
 use std::process::Command;
@@ -88,10 +89,9 @@ fn fmt_watch_time(watch_time_in_sec: f64) -> String {
 }
 
 fn main() -> io::Result<()> {
-    let mut path = String::new();
-    io::stdin()
-        .read_line(&mut path)
-        .expect("Failed to read line");
+    let args: Vec<String> = env::args().collect();
+
+    let path = &args[1];
     let path = path.trim().to_string();
 
     let files = list_dir(&path)?;
