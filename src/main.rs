@@ -1,26 +1,23 @@
-// TODO
-// - store the content of the path DONE
-// - look for video files (mkv, mp4, webm, m4v, mov etcc) Done
-// - calculate the watch time for those files
-// - print out watch time based on each file Later
-// - print out entire watch time Done
-// - compare it with something random
-//      - for nown just 3 (3 idiots, the iron man, ghilee)
-//      - and print any random one
-
-// start fresh counter: 3
-
 use std::env;
 use std::fs;
 use std::io;
+use std::path::Path;
+use std::process;
 use std::process::Command;
 use std::str;
 use std::vec::Vec;
 
 fn list_dir(path: &String) -> io::Result<Vec<String>> {
+    let path = Path::new(path);
+    if !path.exists() {
+        eprintln!(" Path does not exists! ");
+        help_message();
+        process::exit(1);
+    }
+
     let mut file_names: Vec<String> = Vec::new();
 
-    for entry in fs::read_dir(path)? {
+    for entry in fs::read_dir(path).expect("No such directory found") {
         let entry = entry?;
         let file_name = entry.file_name();
         let file_name = match file_name.into_string() {
@@ -87,12 +84,44 @@ fn fmt_watch_time(watch_time_in_sec: f64) -> String {
         hours, minutes, seconds
     )
 }
+fn help_message() {
+    println!("[Video Watch Time]");
+    println!("Version: {}", env!("CARGO_PKG_VERSION"));
+    println!("Usage: wt <video folder>");
+    println!("Options:");
+    println!("    -h, --help     Display help message");
+    println!("    -v, --version  Display version");
+}
 
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
-    let path = &args[1];
-    let path = path.trim().to_string();
+    if args.len() != 2 {
+        help_message();
+        return Ok(());
+    }
+
+    match args[1].as_str() {
+        "-h" => {
+            help_message();
+            return Ok(());
+        }
+        "--help" => {
+            help_message();
+            return Ok(());
+        }
+        "-v" => {
+            println!("Version: {}", env!("CARGO_PKG_VERSION"));
+            return Ok(());
+        }
+        "--version" => {
+            println!("Version: {}", env!("CARGO_PKG_VERSION"));
+            return Ok(());
+        }
+        _ => (),
+    }
+
+    let path = &args[1].trim().to_string();
 
     let files = list_dir(&path)?;
     let video_files = get_video_files(files)?;
