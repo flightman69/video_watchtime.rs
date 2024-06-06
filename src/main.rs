@@ -79,7 +79,7 @@ fn fmt_watch_time(watch_time_in_sec: f64) -> String {
 fn help_message() {
     println!("[Video Watch Time]");
     println!("Version: {}", env!("CARGO_PKG_VERSION"));
-    println!("Usage: wt <video folder>");
+    println!("Usage: videowatchtime <video folder>");
     println!("Options:");
     println!("    -h, --help     Display help message");
     println!("    -v, --version  Display version");
