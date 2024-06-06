@@ -1,34 +1,26 @@
 use std::env;
-use std::fs;
 use std::io;
-use std::path::Path;
-use std::process;
 use std::process::Command;
 use std::str;
 use std::vec::Vec;
+use walkdir::WalkDir;
 
-fn list_dir(path: &String) -> io::Result<Vec<String>> {
-    let path = Path::new(path);
-    if !path.exists() {
-        eprintln!(" Path does not exists! ");
-        help_message();
-        process::exit(1);
+fn list_dir_recursive(path: &str) -> io::Result<Vec<String>> {
+    let mut files: Vec<String> = Vec::new();
+    let walker = WalkDir::new(path).into_iter();
+
+    for entry in walker {
+        match entry {
+            Ok(entry) => {
+                let file_name = entry.path().display().to_string();
+                files.push(file_name);
+            }
+            Err(e) => {
+                eprintln!("Error reading file {}", e);
+            }
+        }
     }
-
-    let mut file_names: Vec<String> = Vec::new();
-
-    for entry in fs::read_dir(path).expect("No such directory found") {
-        let entry = entry?;
-        let file_name = entry.file_name();
-        let file_name = match file_name.into_string() {
-            Ok(name) => name,
-            Err(_) => continue,
-        };
-
-        file_names.push(file_name);
-    }
-
-    Ok(file_names)
+    Ok(files)
 }
 
 fn get_video_files(files: Vec<String>) -> io::Result<Vec<String>> {
@@ -121,13 +113,11 @@ fn main() -> io::Result<()> {
         _ => (),
     }
 
-    let path = &args[1].trim().to_string();
-
-    let files = list_dir(&path)?;
+    let path = &args[1];
+    let files = list_dir_recursive(path)?;
     let video_files = get_video_files(files)?;
     let mut total_watch_time = 0.0;
     for video_file in video_files {
-        let video_file = path.clone() + "/" + &video_file;
         match get_watch_time(&video_file) {
             Ok(val) => total_watch_time += val,
             Err(e) => println!("Error processing video {}: {}", video_file, e),
