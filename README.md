@@ -7,8 +7,8 @@ A simple rust tool to calculate the total watch time of video files you have in 
   - `cd video_watchtime` 
   - `cp target/release/videowatchtime $HOME/.cargo/bin/`
 
-# Usage:
-  - videowatchtime path
+# How to use:
+  - videowatchtime <video folder>
 
 # TODO
   - ~make commandline argument work~
